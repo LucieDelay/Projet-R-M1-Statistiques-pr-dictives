@@ -1,0 +1,1947 @@
+---
+metadata title: "Delay_Lucie_Fiche1_AMA"
+#author: "Lucie Delay"
+#date: "30/04/2022"
+output: 
+  html_document:
+    css: style.css
+    toc: yes
+    toc_float:
+      collapsed: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning=FALSE, message=FALSE, comment = F, error=F)
+```
+
+<h4>Lucie Delay - MECI 2021/22 - Fiche 2 AMA - Cours de Thibaud Deguilhem
+
+<center> <h2>Etude empirique et prédictive</h2> </center>
+<center> <h1>Les déterminants de la satisfaction des clients </h1> </center>
+<center> <h2>_L'effet de la classe de voyage et de l'appartenance au programme de fidélité sur le niveau de satisfaction_ </h2> </center>
+<center> <h3>Département études et prévisions d'Invistico</h3> </center>
+
+```{r}
+library(knitr)
+library(gridExtra)
+library(rstatix)
+library(kableExtra)
+library(AER)
+library (gridExtra)
+library(lmtest)
+library(dplyr)
+library(tidyselect)
+
+#tableaux de régression
+library(sjPlot)
+library(sjmisc)
+library(sjlabelled)
+```
+
+# 1. Introduction
+
+
+Cette étude porte sur les déterminants de la satisfaction des passagers de la compagnie aérienne Invistico. Plus précisément, nous étudions l’effet de l'appartenance à un programme de fidélité d’un passager et/ou de la classe du voyage sur sa satisfaction. Le but de l'étude est de prédire la satisfaction d'un client futur selon les détails de divers paramètres. Ainsi, la compagnie aérienne sait quels aspects de son service doivent être développés pour que les clients soient plus satisfaits. Voici les 3 hypothèses que nous allons tenter de vérifier, selon lesquelles la segmentation en fonction des attentes des clients, via la création de niveaux de service distincts par exemple, est essentielle pour la satisfaction des consommateurs, toute chose égale par ailleurs.
+<br>
+
+-	H1 : Un client bénéficiant d’un programme de fidélité est plus satisfait qu’un client n’en bénéficiant pas, toute chose égale par ailleurs. Ceci implique que la compagnie à intérêt à développer ses programmes de fidélité.
+<br>
+
+-	H2 : Un client voyageant en business class est plus satisfait qu’un client voyageant en Eco ou Eco plus, toute chose égale par ailleurs. Ceci implique que la compagnie à intérêt à élargir ses gammes de voyages pour correspondre aux attentes diverses des voyageurs.
+<br>
+
+-	H3 : Un client voyageant en business class ET bénéficiant d’un programme de fidélité et d’autant plus satisfait qu’un client bénéficiant uniquement de l’un ou de l’autre. Ceci confirme que la personnalisation du service rendu par la compagnie aérienne est déterminante dans la satisfaction du client.
+<br>
+
+
+Plus globalement, nous allons également comprendre au mieux quelles sont les attentes et les perceptions des clients, pour viser leur satisfaction. Nous verrons ce qui influence la satisfaction des clients de la compagnie aérienne en dehors des effets décrits ci-dessus.
+<br>
+
+Cette étude est basée sur les données clients issues du site kaggle.com, qu’Invistico a collecté en 2019. L'étude repose sur la création de modèles prédictifs de régression logistiques Ces modèles déterminent la probabilité d'un client d'être satisfait ou non. Pour tester la robustesse des résultats, nous avons utilisé des modèles de régression linéaire et de régression logit et probit. Nous commencons par établir des modèles linéaires pour avoir une première idée de la relation, puis nous utilisons des régression logistiques qui sont plus adaptées à une variable dépendante binaire (ici la satisfaction). Une fois ces modèles de base établis, nous allons les contrôler par plusieurs variables qui pourraient être omises. Ceci pour vérifier que la probabilité d'être satisfait est réellement due au programme de fidélité ou au fait de voyager en business class, et pas à un biais de variables omises.
+<br>
+
+D’après nos résultats, il est très important pour Invistico de développer la personnalisation de son offre pour augmenter la satisfaction et ultimement la fidélité de ses clients, ce qui est indispensable dans un environnement incertain et compétitif. Le fait de bénéficier d’un programme de fidélité augmente la probabilité de satisfaction de 38%, pour un retard fixé à 14mn (34% pour le modèle linéaire). Le fait de voyager en business class augmente la probabilité de satisfaction de 31%, pour un retard fixé à 14mn (29% pour le modèle linéaire). Le fait de bénéficier d’un programme de fidélité ou de voyager en business class augmente la probabilité de satisfaction de 62,4% (modèle probit 7) ou de 62,5% (modèle probit 8). Ceci encore pour un retard fixé à 14mn. Nous avions 63% pour un modèle linéaire (34+29). Nos résultats sont robustes puisqu'ils ssont proches quelque soit la méthode utilisée : modèle linéaire, logit ou probit. H1 et H2 sont vérifiées, toutefois H3 est moins concluante. Un programme de personnalisation suffit pour augmenter significativement la satisfaction du client.
+
+
+# 2. Revue de littérature
+
+Le transport de passagers sur les avions de ligne a progressé de manière fulgurante depuis la seconde guerre mondiale. La taille des appareils a considérablement augmenté, permettant ainsi le transport de plusieurs centaines de passagers dans un seul appareil. Le défi pour les compagnies aériennes est de satisfaire au mieux leurs nombreux passagers aux attentes et aux goûts variés.
+<br>
+
+Plus largement, la satisfaction du client prend de plus en plus d’importance ces dernières années et ce dans tous les secteurs, du fait de la généralisation de la relation de service. Nous entrons dans une économie du service. Ce virage s’amorce dans les années 1980 et 1990, avec l’intensification de la concurrence et la dérégulation, qui rendent la rentabilité plus difficile à atteindre. Le secteur aérien plus particulièrement, est touché par une forte concurrence entre les compagnies aériennes régulières, mais aussi par l'émergence des compagnies à bas prix. Un premier levier face à cette situation difficile est l’innovation. Le second levier, sur lequel les entreprises misent de plus en plus, est la fidélisation du client et sa « patrimonialisation ». La problématique de la fidélisation prend le dessus sur celle du recrutement, puisque que fidéliser un client est plus rentable que d’en chercher un nouveau. En effet, la valeur du client sur le long terme est plus importante puisqu’elle génère un flux récurrent de revenus et permet d’amortir les coûts de recrutement.
+<br>
+
+Dans le secteur aérien, la satisfaction des consommateurs est un enjeu clé pour les fidéliser. Les avantages compétitifs d'une compagnie aérienne ne reposent pas seulement sur le prix. Les passagers choisissent aussi une compagnie pour l'expérience dans son ensemble. Les zones d'embarquement remplies de monde, les longues files d'attente et les pertes de bagages encouragent les passagers à choisir une compagnie qui puisse les faire passer rapidement la formalité de l'embarquement et qui assure leur sécurité jusqu'à destination, avec leurs bagages.
+<br>
+
+Mais, qu’est-ce que la satisfaction ? Pour Hoyer et MacInnis (2004), la satisfaction est « un sentiment qui résulte d'une évaluation positive ou le sentiment d'être heureux du consommateur (...) ». Ensuite, son état de satisfaction ou d'insatisfaction va le pousser à l'action. S'il est satisfait, il va acheter de nouveau le produit et/ou en faire l'éloge. Dans le cas contraire, il pourrait par exemple se plaindre et communiquer par un bouche à oreille négatif.
+<br>
+
+Les stratégies de qualité de service qui réussissent sont en général caractérisées par une segmentation des consommateurs, un service adapté, des garanties, un feedback en continu du consommateur. La segmentation en fonction des attentes des consommateurs dans le but de créer des niveaux de service distincts qui dépassent ceux des attentes est essentielle pour attirer les consommateurs et créer de la loyauté. Nous allons voir si cela est confirmé par l’étude de nos hypothèses qui correspondent exactement à la thèse défendue par Stein (2006).
+
+D’après un article d’un site de Marketing, le secteur du Transport aérien recueille en moyenne une satisfaction globale de 7,6 sur 10, note supérieure à celle des autres secteurs, à l'exception des Assurances. 
+<br>
+Parmi les compétences que la clientèle accorde aux compagnies aériennes, figurent : 
+<br>
+-	Le service et la propreté à bord (respectivement notés 7,9 et 8,1).
+<br>
+-	Le niveau de sécurité (8,0).
+<br>
+-	La disponibilité et l'amabilité du personnel (7,9), qui contribuent à 15% de la satisfaction.
+<br>
+-	L’accueil au guichet (7,8).
+<br>
+-	En termes d'image, les compagnies aériennes sont généralement considérées comme professionnelles (7,6 sur 10) et en qui l'on peut avoir confiance (7,5). L’image contribue à 39% de la satisfaction (Proximité / Confiance : 18 % Modernité/ Réputation technique : 21 %).
+<br>
+
+Les variables les moins bien perçues sont celles :
+<br>
+-	"d'individualisation du service" (7 sur 10), c’est-à-dire l’attention portée aux demandes spécifiques, réponses à d'éventuelles réclamations, la diversité des services proposés. En retrait par rapport items exprimant la « qualité du relationnel ». Or ces variables sont très déterminantes dans l’explication de la satisfaction (12%), donc elles sont discriminantes.
+<br>
+-	L'attente (7,3) est notée de façon intermédiaire et contribue également fortement à la satisfaction de la clientèle (15 % de contribution à lui seul).
+<br>
+-	Rapport qualité/prix (6,9) : 19% de contribution. C’est la variable la plus explicative de la satisfaction client.
+<br>
+-	Des items d'image renvoyant aux valeurs sociétales des compagnies aériennes, tel que le respect de l’environnement ou le climat social à l'interne, sont parmi les plus mal notés. 
+<br>
+
+Bibliographie
+<br>
+Stein, Cyril. « Etude de la perception de la qualité, du niveau de satisfaction et de la fidélité des passagers effectuant des vols longs courriers transatlantiques entre l’Europe et l’Amérique du Nord ». Université du Québec, 2006.
+<br>
+https://www.e-marketing.fr/Marketing-Magazine/Article/Relation-client-ou-en-sont-les-compagnies-aeriennes--10527-1.htm#
+
+# 3. Description des données
+
+```{r}
+al <- read.table(file = "Data/airline.csv", # nom du fichier
+                  sep = ",",                 # séparateur
+                  header = TRUE,             # variables en première ligne
+                # row.names = 1,              # individus en première colonne
+                 check.names = F) 
+```
+
+Voici le tableau récapitulatif des données initiales
+![](Images/Données.JPG)
+
+Plusieurs types de variables en ressortent:
+<br>
+
+- **Caractéristiques intrinsèques au client**<br>
+Genre
+<br>
+Age
+<br>
+
+- **Le client vis-à-vis de la compagnie**
+<br>
+Satisfaction<br>
+Type de client (programme de fidélité ou non)
+<br>
+
+- **Caractéristiques du vol**<br>
+Type de voyage<br>
+Classe<br>
+Distance<br>
+Retards de départ et d'arrivée.
+<br>
+
+Comme dit précédemment, l'individualisation du service est représentée par les variables "Type de Client" et "Classe", mais aussi par la variable "Aide en ligne".
+<br>
+
+- **Aspects techniques et organisationnels de la compagnie**
+<br>
+Departure / arrival time convenient
+<br>
+Gate location
+<br>
+Ease of online booking
+<br>
+Baggage handling, qui reflète également la sécurité et la confiance.
+<br>
+Online boarding (embarquement en ligne)
+<br>
+
+- **Qualité du service et du relationnel**<br>
+On-board service<br>
+Checkin service (enregistrement)
+<br>
+
+- **Confort du vol**<br>
+Seat comfort<br>
+Food and drink<br>
+Inflight wifi service<br>
+Inflight entertainment<br>
+Cleanliness<br>
+<br>
+
+
+Ci-dessous les statistiques descriptives pour les variables continues
+![](Images/statD.JPG)
+
+Pour analyser les données avons recodé en facteur les variables de niveau qui étaient codées en caractère. Les caractéristiques du vol et du clients ont été harmonisés pour qu'elles soient toujours au nombre de 2 pour chacune de ces variables. Le niveau 1 correspond toujours à notre hypothèse : client satisfait, client loyal et client en classe business. Ceci permet par la suite une comparaison plus simple des relations entre variables. Nous avons également renommé les variables en français, tout en enlevant les espaces pour des raisons techniques. Nous avons n= 12988. Pour que les coefficients soient plus facilement interprétables, nous avons également changé l'unité de mesure du retard, désormais mesuré en heures. 
+
+
+```{r}
+#Recodage des variables en facteur
+al$satisfaction<-as.factor(al$satisfaction)
+#en numérique -1 pour avoir [0,1]
+al$satisfaction<-as.numeric(al$satisfaction)-1 #0 = non satisfait, 1 = satisfait
+
+al$Gender<-as.factor(al$Gender)
+al$Gender<-as.numeric(al$Gender)-1 #0 = Female, 1 = male
+
+al$`Customer Type`<-as.factor(al$`Customer Type`)
+str(al$`Customer Type`)
+#al$Class<-relevel(al$Class,ref="1")
+al$`Customer Type`<-as.numeric(al$`Customer Type`)-1 # 0 = déloyal, 1 = loyal
+al$`Type of Travel`<-as.factor(al$`Type of Travel`)
+al$`Type of Travel`<-as.numeric(al$`Type of Travel`)-1 #0 = professionnel, 1 = personnel
+
+al$Class<-as.factor(al$Class)
+levels(al$Class)<-c(1,2,2) # class de 3 levels à 2. 1 = business, 2 = eco ou eco plus
+#classé par ordre alphabétique, il faut changer
+al$Class<-relevel(al$Class,ref="2") #1 = Eco, 2 = Business
+al$Class<-as.numeric(al$Class,ref="2")-1 
+#0 = Eco ou Eco +, 1 = Business
+
+al$`Seat comfort`<-as.factor(al$`Seat comfort`)
+al$`Departure/Arrival time convenient`<-as.factor(al$`Departure/Arrival time convenient`)
+al$`Food and drink`<-as.factor(al$`Food and drink`)
+al$`Gate location`<-as.factor(al$`Gate location`)
+al$`Inflight wifi service`<-as.factor(al$`Inflight wifi service`)
+al$`Inflight entertainment`<-as.factor(al$`Inflight entertainment`)
+al$`Online support`<-as.factor(al$`Online support`)
+al$`Ease of Online booking`<-as.factor(al$`Ease of Online booking`)
+al$`On-board service`<-as.factor(al$`On-board service`)
+al$`Leg room service`<-as.factor(al$`Leg room service`)
+al$`Baggage handling`<-as.factor(al$`Baggage handling`)
+#PAS DE 0
+al$`Checkin service`<-as.factor(al$`Checkin service`)
+al$Cleanliness<-as.factor(al$Cleanliness)
+al$`Online boarding`<-as.factor(al$`Online boarding`)
+
+#age en numérique
+al$Age<-as.numeric(al$Age)
+
+#flight distance en numérique
+al$`Flight Distance`<-as.numeric(al$`Flight Distance`)
+#Retard en heure
+al$`Departure Delay in Minutes`<-as.numeric(al$`Departure Delay in Minutes`)/60
+al$`Arrival Delay in Minutes`<-as.numeric(al$`Arrival Delay in Minutes`)
+
+#création variable retard total
+al$`Retardtotal`<-(al$`Departure Delay in Minutes`+al$`Arrival Delay in Minutes`)
+
+#Enlever espaces des variables pour qu'elles s'affichent tableaux de régression
+#Renommer
+colnames(al)[colnames(al) %in% c("Gender","Customer Type","Type of Travel","Class","Flight Distance","Seat comfort","Departure/Arrival time convenient","Food and drink","Gate location","Inflight wifi service","Inflight entertainment","Online support","Ease of Online booking","On-board service","Leg room service","Baggage handling","Checkin service","Cleanliness","Online boarding","Departure Delay in Minutes","Arrival Delay in Minutes"    )] <-c("Genre","TypeClient","TypeVoyage","Classe","DistanceVol","ConfortSiege","PraticiteHoraires","Nourriture","LocalisationPorte","WifiVol","DivertissementVol","AideEnLigne","ReservationInternet","ServiceVol","EspaceJambes","GestionBagages","Enregistrement","Proprete","EmbarquementEnLigne","RetardDepartMn","RetardArriveeMn")
+
+#éliminer les NA
+#al<-al[complete.cases(al), ]
+```
+
+
+
+# 4. Résultats : quel effet sur la satisfaction d'avoir un programme de fidélité et d'être en classe business, toute chose égale par ailleurs?
+
+## 4.1. Modèles linéaires : une première idée
+
+Comme dit dans la revue de littérature, le retard / l'attente et un des facteurs contribuant le plus à la (non)satisfaction. C'est pourquoi c'est notre variable principale. A partir du modèle de base (modèle 1), nous allons déterminer si le type de client (programme de fidélité ou non) et la classe de voyage (business ou non) changent la donne. Les modèles 2 et 3 étudient l'effet de l'un et de l'autre séparément. Le modèle 4 étudie les effets des deux variables pour déterminer plus précisément quel effet est du à l'une ou à l'autre, sans biais d'omission. Dans la partie 4.3. nous intégrerons d'autres variables de la base de donnée pour corriger d'autres biais d'omission éventuels. Enfin, le modèle 5 étudie l'effet d'être à la fois un client fidèle et en classe business sur la satisfaction.
+
+Nous allons estimer et interpréter les modèles suivants:
+
+$$1.satisfaction = \beta_0 + \beta_0  RetardDépart + \mu$$
+
+$$2.satisfaction = \beta_0 + \beta_1  RetardDépart + \beta_2 Type Client + \mu$$
+
+$$3.satisfaction = \beta_0 + \beta_1  RetardDépart + \beta_2 Classe + \mu$$
+
+$$4.satisfaction = \beta_0 + \beta_1  RetardDépart + \beta_2 Type Client+ \beta_3 Classe + \mu$$
+
+$$5.satisfaction = \beta_0 + \beta_1  RetardDépart +\beta_2 (Type Client*Classe) + \mu$$
+
+```{r}
+#Modèles linéaires
+ML1<-lm(satisfaction~RetardDepartMn, data = al)
+ML2<-lm(satisfaction~RetardDepartMn+ TypeClient, data = al)
+ML3<-lm(satisfaction~RetardDepartMn+ Classe, data = al)
+ML4<-lm(satisfaction~RetardDepartMn+ TypeClient + Classe, data = al)
+ML5<-lm(satisfaction~TypeClient, data = al)
+ML6<-lm(satisfaction~Classe, data = al)
+ML7<-lm(satisfaction~RetardDepartMn+(TypeClient*Classe), data = al)
+#ML8<-lm(satisfaction~RetardDepartMn(TypeClient*Classe), data = al)
+```
+
+Ci dessous les graphiques représentant respectivement la droite de régression linéaire entre satisfaction et retard (modèle 1), satisfaction et type de client, satisfaction et classe. Même si nous avons ici des modèles binaires et que le pouvoir explicatif d'une _droite_ de régression est en conséquence limité et peu précis, ces graphiques nous donnent une première idée des relations entre variables. Par la suite nous comparerons avec les modèles logistiques plus adaptés et plus précis.
+
+```{r}
+p1 <- plot(x=al$RetardDepartMn,
+     y=al$satisfaction,
+     xlab="Retard en heures",
+     ylab="Satisfaction du client",
+    main = " Satisfaction selon le retard en heures
+    (au départ)",
+     cex = 0.6,
+     pch = 19,
+    ylim = c(-0.4, 1.4),
+     col = "black")
+#ajouter les axes horizontaux et du texte
+abline(h=1,  #hauteur
+       lty = 2, #type de pointillé
+       col = "darkred")
+abline(h=0,
+       lty = 2,  #type pointillé
+       col = "darkred")
+text(500, #pos absisses
+     0.9, #position ordonnées
+     cex = 0.8, #taille
+     "Satisfait")
+text(500, #position absisses 
+     -0.1, #position du texte ordonnées
+     cex=0.8, #taille
+     "Non satisfait")
+abline(ML1, 
+       col ="steelblue", 
+       lwd = 3,5 #largeur du trait
+       )
+```
+
+Nous voyons qu'un retard de départ diminue la satisfaction du client.  Toutefois, même sans retard, les clients ne sont pas totalement satisfaits. De même, à retard égal, certains clients sont satisfaits et d'autres non. On constate qu'il existe donc d'autres caractéristiques que le retard qui impactent la satisfaction des clients.
+<br>
+
+Sur les deux graphiques suivants nous constatons que l'appartenance à un programme de fidélité et le fait de voyager en classe business ont un effet inverse : cela augmente la satisfaction du client. Cela confirme nos hypothèses initiales selon lesquelles la personnalisation du service augmente la satisfaction. Si ces droites de régression ne nous donnent qu'une idée grossière de la relation, on constate que les clients ne voyageant pas en classe business sont davantage satisfaits que ceux ne bénéficiant pas d'un programme de fidélité. Peut-être cela est-il du au fait que les clients voyageant en classe Eco ou Eco + sont satisfaits du rapport qualité-prix, variable omise dans la base de données. En terme d'effet, la pente de la droite de la fidélité du client semble plus importante que celle de la classe de voyage : être dans un programme de fidélité impacte davantage la satisfaction que de voyager en business class. A première vue toutefois, les deux variables impactent fortement la satisfaction des clients.
+
+```{r}
+p2<- plot(x=al$TypeClient,
+     y=al$satisfaction,
+     xlab="Client fidèle ou non (1 = fidèle)",
+     ylab="Satisfaction du client",
+    main = "Satisfaction selon l'appartenance 
+    à un programme de fidélité",
+     cex = 0.6,
+     pch = 19,
+    ylim = c(-0.4, 1.4),
+     col = "black")
+#ajouter les axes horizontaux et du texte
+abline(h=1,  #hauteur
+       lty = 2, #type de pointillé
+       col = "darkred")
+abline(h=0,
+       lty = 2,  #type pointillé
+       col = "darkred")
+text(0.8, #pos absisses
+     0.9, #position ordonnées
+     cex = 0.8, #taille
+     "Satisfait")
+text(0.8, #position absisses 
+     -0.1, #position du texte ordonnées
+     cex=0.8, #taille
+     "Non satisfait")
+abline(ML5, 
+       col ="steelblue", 
+       lwd = 3,5 #largeur du trait
+       )
+
+p3<- plot(x=al$Classe,
+     y=al$satisfaction,
+     xlab="Classe de voyage (1= Business, 0= Eco ou Eco +)",
+     ylab="Satisfaction du client",
+    main = "Satisfaction selon la classe de voyage",
+     cex = 0.6,
+     pch = 19,
+    ylim = c(-0.4, 1.4),
+     col = "black")
+
+#ajouter les axes horizontaux et du texte
+abline(h=1,  #hauteur
+       lty = 2, #type de pointillé
+       col = "darkred")
+abline(h=0,
+       lty = 2,  #type pointillé
+       col = "darkred")
+text(0.8, #pos absisses
+     0.9, #position ordonnées
+     cex = 0.8, #taille
+     "Satisfait")
+text(0.8, #position absisses 
+     -0.1, #position du texte ordonnées
+     cex=0.8, #taille
+     "Non satisfait")
+abline(ML6, 
+       col ="steelblue", 
+       lwd = 3,5 #largeur du trait
+       )
+```
+
+
+Ci-dessous le tableau récapitulatif des coefficients de ces modèles. Nous utilisons l'abbréviation "TC" pour "Type de Client", qui correspond au fait de bénéficier ou non d'un programme de fidélité.
+
+```{r}
+tab_model(ML1,ML2,ML3,ML4,ML5,ML6,ML7,
+          show.r2 = F,
+          show.se = F,
+          show.ci=F,
+          p.style ="stars",
+          digits=3,
+          vcov.fun="vcovHC",
+          vcov.type = "HC1",
+          dv.labels = c("ML1 (Retard)","ML2 (Retard+TC)","ML3 (Retard + Classe)","ML4 (Retard + TC + Classe)","ML5 (TC)","ML6 (Classe)","ML7 (Retard+(TC et Classe))"))
+```
+
+On constate que tous les coefficients sont très significatifs. Dans le modèle 1 on régresse la variable satisfaction uniquement sur le retard de départ. Le coefficient de la pente est de -0.058, ce qui signifie que lorsque le retard augmente de 1%, alors la probabilité d'être satisfait diminue de 6% en moyenne. Nous mesurons en pourcentage puisque la distribution d'une probabilité est comprise en 0 et 1.
+<br>
+
+Lorsque l'on contrôle l'effet du retard par le type de client _ou_ la classe, celui-ci est quasiement inchangé (de 0.058 à 0.057 ou 0.056). Toutefois lorsqu'on contrôle par le type de client et la classe, l'effet du retard n'est plus de 6% mais de 5%. 
+<br>
+
+Comme nous l'avions constaté sur les graphiques, bénéficier d'un programme de fidélité augmente d'avantage la probabilité d'être satisfait que de voyager en business class. Sur 2 individus dont le vol a eu un retard équivalent et qui voyagent dans la même classe, la probabilité d'être satisfait est 34% plus élevée pour l'individu bénéficiant d'un programme de fidélité. De plus, sur 2 individus dont le vol a eu un retard équivalent et qui sont du même type, la probabilité d'être satisfait est de 29% plus élevée pour l'individu qui voyage en business class.
+<br>
+
+Si le modèle 4 contrôle par 3 variables (Retard, type et classe), on peut aussi contrôler par une 4ème variable : être à la fois en programme de fidélité _et_ en business class. Les effets décrits précédemment sont diminués : de 34% à 33% pour le type de client et de 29% à 26% pour la classe de voyage. Le quatrième effet est le suivant: Sur 2 individus dont le vol a eu un retard équivalent, qui sont du même type et qui voyagent dans la même classe, la probabilité d'être satisfait est 4% plus élevée pour l'individu à bénéficiant à la fois d'un programme de fidélité et voyageant en business class.
+
+
+## 4.2. Modèles logistiques : une mesure plus précise
+
+Les modèles linéaires ont un défaut fondamental lorsqu'il s'agit d'interpréter une variable dépendante binaire (ici la satisfaction) : la droite de régression linéaire s'étend de moins l'infini à plus l'infini. Cela entre en contradiction avec l'intervalle de définition d'une probabilité (ici d'être satisfait) qui est entre 0 et 1. C'est pourquoi nous utilisons les modèles de régression logistiques (probit et logit). Leur méthode est de transformer la fonction de probabilité non linéaire en une fonction linéaire : les fréquences cumulées. Toutefois, les coefficients donnés ne sont plus directement interprétables. Faire une différence entre les prédictions de différents modèles permet toutefois d'avoir une idée beaucoup plus précise des effets que nous avons décrits ci-dessus. En effet, on peut calculer par exemple la différence de probabilité d'être satisfait entre un client dont le vol a un retard d'1 heure contre un client dont le vol a eu un retard de 2 heures. On peut également prédire la satisfaction d'un client dont le vol a eu un certain retard, selon qu'il soit fidèle ou non, ou selon qu'il soit en business class ou non. C'est ce que nous allons faire.
+
+Ci-dessous les coefficients des mêmes modèles, mais en probit. En cliquant sur details, vous avez les coefficients des modèles logit. La différence entre les logit et probit est minime. Toutefois, le modèle probit est plus adapté aux distributions étendues car il prédit mieux les queues de distribution, alors que le modèle logit est plus adapté aux distributions rassemblées.
+
+```{r}
+#modèles probit
+MP1<-glm(satisfaction~RetardDepartMn,
+                family= binomial(link="probit"),
+                data= al)
+MP2<-glm(satisfaction~RetardDepartMn+TypeClient,
+                family= binomial(link="probit"),
+                data= al)
+MP3<-glm(satisfaction~RetardDepartMn+Classe,
+                family= binomial(link="probit"),
+                data= al)
+MP4<-glm(satisfaction~RetardDepartMn+TypeClient+Classe,
+                family= binomial(link="probit"),
+                data= al)
+MP5<-glm(satisfaction~TypeClient,
+         family= binomial(link="probit"),
+                data= al)
+MP6<-glm(satisfaction~Classe,
+         family= binomial(link="probit"),
+                data= al)
+MP7<-glm(satisfaction~TypeClient*Classe,
+         family= binomial(link="probit"),
+                data= al)
+MP8<-glm(satisfaction~RetardDepartMn + (TypeClient*Classe),
+         family= binomial(link="probit"),
+                data= al)
+
+tab_model(MP1,MP2,MP3,MP4,MP5,MP6,MP7,MP8,
+          show.r2 = F,
+          transform = NULL,
+          show.se = F,
+          show.ci=F,
+          p.style ="stars",
+          digits=3,
+          vcov.fun="vcovHC",
+          vcov.type = "HC1",
+          dv.labels = c("MP1 (Retard)","MP2 (Retard+TC)","MP3 (Retard + Classe)","MP4 (Retard + TC + Classe)", "MP5 (TC)", "MP6 (Classe)", "MP7 (TC et Classe)","MP8 (Retard + (TC et Classe)) "))
+
+```
+
+<details>
+
+```{r}
+#modèles logit
+MLG1<-glm(satisfaction~RetardDepartMn,
+                family= binomial(link="logit"),
+                data= al)
+MLG2<-glm(satisfaction~RetardDepartMn+TypeClient,
+                family= binomial(link="logit"),
+                data= al)
+MLG3<-glm(satisfaction~RetardDepartMn+Classe,
+                family= binomial(link="logit"),
+                data= al)
+MLG4<-glm(satisfaction~RetardDepartMn+TypeClient+Classe,
+                family= binomial(link="logit"),
+                data= al)
+MLG5<-glm(satisfaction~TypeClient,
+         family= binomial(link="logit"),
+                data= al)
+MLG6<-glm(satisfaction~Classe,
+         family= binomial(link="logit"),
+                data= al)
+MLG7<-glm(satisfaction~TypeClient*Classe,
+         family= binomial(link="logit"),
+                data= al)
+MLG8<-glm(satisfaction~RetardDepartMn + (TypeClient*Classe),
+         family= binomial(link="logit"),
+                data= al)
+
+tab_model(MLG1,MLG2,MLG3,MLG4,MLG5,MLG6,MLG7,MLG8,
+          show.r2 = F,
+          transform = NULL,
+          show.se = F,
+          show.ci=F,
+          p.style ="stars",
+          digits=3,
+          vcov.fun="vcovHC",
+          vcov.type = "HC1",
+          dv.labels = c("MLG1 (Retard)","MLG2 (Retard+TC)","MLG3 (Retard + Classe)","MLG4 (Retard + TC + Classe)", "MLG5 (TC)", "MLG6 (Classe)", "MLG7 (TC et Classe)","MLG8 (Retard + (TC et Classe)) "))
+
+```
+
+</details>
+
+Si nous ne pouvons pas interpréter le niveau des coefficients, nous pouvons interpréter leur sens et leur significativité. Nous voyons que, comme pour les modèles linéaires, l'effet du retard est toujours négatif sur la probabilité d'être satisfait. A l'inverse, l'effet du type de client et de la classe sont toujours positif, comme pour les modèles linéaires également. Pour le modèle logit tous les coefficients sont au moins significatifs, mais pour le modèle probit, les coefficients de l'effet conjoint d'être fidèle ET en business class n'est pas significatif.
+
+
+
+Ci-dessous la courbe de régression logistique de la probabilité d'être satisfait selon le retard. En cliquant sur details, vous voyez que les courbes logit et probit se superposent.
+
+```{r}
+#Visualisation probit
+plot(x=al$RetardDepartMn,
+     y=al$satisfaction,
+     xlab="Retard au départ en heures",
+     ylab="Satisfaction du client",
+    main = " Modèle Probit de la probabilité de satisfaction selon le retard en heures",
+     cex = 0.6,
+     pch = 19,
+    ylim = c(-0.4, 1.4),
+     col = "black")
+
+#ajouter les axes horizontaux et du texte
+abline(h=1,  #hauteur
+       lty = 2, #type de pointillé
+       col = "darkred")
+abline(h=0,
+       lty = 2,  #type pointillé
+       col = "darkred")
+text(500, #pos absisses
+     0.9, #position ordonnées
+     cex = 0.8, #taille
+     "Satisfait")
+text(500, #position absisses 
+     -0.1, #position du texte ordonnées
+     cex=0.8, #taille
+     "Non satisfait")
+#ajouter la fonction de régression
+x <- seq(0,2000,0.01)  #séquence des points de la droite (début,fin,incrémentation)
+y <- predict(MP1, 
+             list(RetardDepartMn=x), #comprends pas cette ligne
+             type = "response") #comprends pas cette ligne
+lines (x,y, #coordonées
+       lwd= 3.5,
+       col= "steelblue")
+
+```
+
+<details>
+
+```{r}
+#Visualisations logit et logit + probit
+
+#Que logit
+plot(x=al$RetardDepartMn,
+     y=al$satisfaction,
+     xlab="Retard au départ en minutes",
+     ylab="Satisfaction du client",
+    main = " Modèle Logit de la probabilité
+    de satisfaction selon le retard en minutes",
+     cex = 0.6,
+     pch = 19,
+    ylim = c(-0.4, 1.4),
+     col = "black")
+
+#ajouter les axes horizontaux et du texte
+abline(h=1,  #hauteur
+       lty = 2, #type de pointillé
+       col = "darkred")
+abline(h=0,
+       lty = 2,  #type pointillé
+       col = "darkred")
+text(500, #pos absisses
+     0.9, #position ordonnées
+     cex = 0.8, #taille
+     "Satisfait")
+text(500, #position absisses 
+     -0.1, #position du texte ordonnées
+     cex=0.8, #taille
+     "Non satisfait")
+#ajouter la fonction de régression
+x <- seq(0,2000,0.01)  #séquence des points de la droite (début,fin,incrémentation)
+y_logit <- predict(MLG1, 
+             list(RetardDepartMn=x), #comprends pas cette ligne
+             type = "response") #comprends pas cette ligne
+lines (x,y_logit,
+       lwd=3, #largeur de la ligne
+       col="black",
+       lty=2)   # type de ligne
+
+
+#Probit et logit
+plot(x=al$RetardDepartMn,
+     y=al$satisfaction,
+     xlab="Retard au départ en minutes",
+     ylab="Satisfaction du client",
+    main = " Modèles Probit et Logit de la probabilité de satisfaction
+    selon le retard en minutes",
+     cex = 0.6,
+     pch = 19,
+    ylim = c(-0.4, 1.4),
+     col = "black")
+
+#ajouter les axes horizontaux et du texte
+abline(h=1,  #hauteur
+       lty = 2, #type de pointillé
+       col = "darkred")
+abline(h=0,
+       lty = 2,  #type pointillé
+       col = "darkred")
+text(500, #pos absisses
+     0.9, #position ordonnées
+     cex = 0.8, #taille
+     "Satisfait")
+text(500, #position absisses 
+     -0.1, #position du texte ordonnées
+     cex=0.8, #taille
+     "Non satisfait")
+#ajouter la fonction de régression
+x <- seq(0,2000,0.01)  #séquence des points de la droite (début,fin,incrémentation)
+y_probit <- predict(MP1, 
+             list(RetardDepartMn=x), #comprends pas cette ligne
+             type = "response") #comprends pas cette ligne
+y_logit <- predict(MLG1, 
+             list(RetardDepartMn=x), #comprends pas cette ligne
+             type = "response") #comprends pas cette ligne
+lines (x,y_logit,
+       lwd=3, #largeur de la ligne
+       col="black",
+       lty=2)   # type de ligne
+lines (x,y_probit, #coordonées
+       lwd= 3.5,
+       col= "steelblue")
+
+```
+
+</details>
+
+Nous constatons que à partir de 10 heures de retard, ce qui est déjà conséquent, la probabilité d'être satisfait avoisine les 0. Entre 5 et 10 heures, elle est entre 0,25 et 0. Toutefois, même avec peu de retard, la satisfaction reste moyenne (autour de 0.5). Cela confirme ce que nous avions repéré sur le modèle linéaire : il existe d'autres déterminants de la satisfaction du client que le retard du vol.
+
+
+Maintenant, répondons à la question fondamentale de notre étude: quelle est la différence estimée de probabilité de satisfaction entre deux clients hypothétiques faisant face à un même retard, mais qui bénéfient ou pas d'un programme de fidélité et qui voyagent ou pas en business class? La personnalisation de l'offre est elle déterminante pour satisfaire le client?
+
+Tout d'abord, voici les différences de probabilité de satisfaction selon le retard de départ en heure uniquement (modèle probit).
+
+
+
+Ci-dessous la moyenne du retard au départ que nous allons prendre comme référence.
+```{r}
+mean(al$RetardDepartMn)
+```
+
+Ci-dessous les différences de satisfaction selon un écart de retard au départ entre 2 clients hypothétiques de:<br>
+- 0-14 mn. Une augmentation du retard de 0 à 14 mn diminue la probabilité de satisfaction de 1,4%.<br>
+- 0-4 heures. Une augmentation du retard de 0 à 4 heures diminue la probabilité de satisfaction de 23,7%.<br>
+- 4-8 heures. Une augmentation du retard de 4 à 8 heures diminue la probabilité de satisfaction de 18%.<br>
+- 0-15 heures. Une augmentation du retard de 0 à 15 heures diminue la probabilité de satisfaction de 55%.<br>
+- 0-26 heures. Une augmentation du retard de 0 à 26 heures diminue la probabilité de satisfaction de 56%.<br>
+- 15-26 heures. Une augmentation du retard de 15 à 26 heures diminue la probabilité de satisfaction de 2%.<br>
+
+
+```{r}
+#PROBIT probabilité satisfaction client selon retard de départ (0-14mn, la moyenne)
+predictionsp1<- predict(MP1,
+                      newdata =data.frame("RetardDepartMn" = c(0,0.24)), #15mn
+                      type= "response"
+                      )
+diff(predictionsp1)
+
+predictionsp2<- predict(MP1,
+                      newdata =data.frame("RetardDepartMn" = c(0,4)),
+                      type= "response"
+                      )
+diff(predictionsp2)
+
+predictionsp3<- predict(MP1,
+                      newdata =data.frame("RetardDepartMn" = c(4,8)),
+                      type= "response"
+                      )
+diff(predictionsp3)
+
+predictionsp4<- predict(MP1,
+                      newdata =data.frame("RetardDepartMn" = c(0,15)),
+                      type= "response"
+                      )
+diff(predictionsp4)
+
+predictionsp5<- predict(MP1,
+                      newdata =data.frame("RetardDepartMn" = c(0,26)),
+                      type= "response"
+                      )
+diff(predictionsp5)
+
+predictionsp6<- predict(MP1,
+                      newdata =data.frame("RetardDepartMn" = c(15,26)),
+                      type= "response"
+                      )
+diff(predictionsp6)
+#ccl : retard pas seule variable
+```
+
+En cliquant sur details, vous avez les mêmes différences mais avec le modèle logit.
+<details>
+
+```{r}
+#LOGITprobabilité satisfaction client selon retard de départ (0-14mn, la moyenne)
+predictionsl1<- predict(MLG1,
+                      newdata =data.frame("RetardDepartMn" = c(0,0.24)), #15mn
+                      type= "response"
+                      )
+diff(predictionsl1)
+
+predictionsl2<- predict(MLG1,
+                      newdata =data.frame("RetardDepartMn" = c(0,4)),
+                      type= "response"
+                      )
+diff(predictionsl2)
+
+predictionsl3<- predict(MLG1,
+                      newdata =data.frame("RetardDepartMn" = c(4,8)),
+                      type= "response"
+                      )
+diff(predictionsl3)
+
+predictionsl4<- predict(MLG1,
+                      newdata =data.frame("RetardDepartMn" = c(0,15)),
+                      type= "response"
+                      )
+diff(predictionsl4)
+
+predictionsl5<- predict(MLG1,
+                      newdata =data.frame("RetardDepartMn" = c(0,26)),
+                      type= "response"
+                      )
+diff(predictionsl5)
+
+predictionsl6<- predict(MLG1,
+                      newdata =data.frame("RetardDepartMn" = c(15,26)),
+                      type= "response"
+                      )
+diff(predictionsl6)
+#ccl : retard pas seule variable
+```
+</details>
+<br>
+
+Maintenant voici les différences de probabilité de satisfaction, avec un retard fixé à la moyenne (= 14 min, soit 0.24 heure). <br>
+
+- selon le type de client. Le fait de bénéficier d'un programme de fidélité augmente la probabilité de satisfaction de 38%, pour un retard fixé à 14mn (34% pour le modèle linéaire).<br>
+
+- selon la classe. Le fait de voyager en business class augmente la probabilité de satisfaction de 31%, pour un retard fixé à 14mn (29% pour le modèle linéaire).<br>
+
+- selon le type de client ou la classe (résultats du modèle probit 7 puis 8). Le fait de bénéficier d'un programme de fidélité ou de voyager en business class augmente la probabilité de satisfaction de 62,4% (modèle probit 7) ou de 62,5% (modèle probit 8). Ceci encore pour un retard fixé à 14mn. Nous avions 63% pour un modèle linéaire (34+29).
+
+Nos hypothèses H1 et H2 sont vérifiées.
+
+On constate des résultats quasiment identiques avec les modèles liénaires et logit, ce qui affirme la robustesse des résultats.
+
+
+```{r}
+#satisfaction selon type client pour retard = 14 (moyenne)
+predictionspTC1<- predict(MP2,
+                      newdata =data.frame("TypeClient"=c(0,1),"RetardDepartMn" = c(0.24,0.24)),
+                      type= "response"
+                      )
+diff(predictionspTC1)
+
+#satisfaction selon classe pour retard = 14 (moyenne)
+predictionspClasse1<- predict(MP3,
+                      newdata =data.frame("Classe"=c(0,1),"RetardDepartMn" = c(0.24,0.24)),
+                      type= "response"
+                      )
+diff(predictionspClasse1)
+
+#satisfaction selon TC et classe pour retard = 14 (moyenne)
+predictionspTCClasse1<- predict(MP7,
+                      newdata =data.frame("TypeClient"=c(0,1) ,"Classe"=c(0,1),"RetardDepartMn" = c(0.24,0.24)),
+                      type= "response"
+                      )
+diff(predictionspTCClasse1)
+
+#satisfaction selon retard + (TC et classe) pour retard = 14 (moyenne)
+predictionspRTCClasse1<- predict(MP8,
+                      newdata =data.frame("TypeClient"=c(0,1) ,"Classe"=c(0,1),"RetardDepartMn" = c(0.24,0.24)),
+                      type= "response"
+                      )
+diff(predictionspRTCClasse1)
+#en rentrant retard dans modèle légèrement supérieur
+```
+
+En cliquant sur details, vous avez les mêmes différences en logit.
+<details>
+```{r}
+#satisfaction selon type client pour retard = 14 (moyenne)
+predictionslTC1<- predict(MLG2,
+                      newdata =data.frame("TypeClient"=c(0,1),"RetardDepartMn" = c(0.24,0.24)),
+                      type= "response"
+                      )
+diff(predictionslTC1)
+
+#satisfaction selon classe pour retard = 14 (moyenne)
+predictionslClasse1<- predict(MLG3,
+                      newdata =data.frame("Classe"=c(0,1),"RetardDepartMn" = c(0.24,0.24)),
+                      type= "response"
+                      )
+diff(predictionslClasse1)
+
+#satisfaction selon TC et classe pour retard = 14 (moyenne)
+predictionslTCClasse1<- predict(MLG7,
+                      newdata =data.frame("TypeClient"=c(0,1) ,"Classe"=c(0,1),"RetardDepartMn" = c(0.24,0.24)),
+                      type= "response"
+                      )
+diff(predictionslTCClasse1)
+
+#satisfaction selon retard + (TC et classe) pour retard = 14 (moyenne)
+predictionslRTCClasse1<- predict(MLG8,
+                      newdata =data.frame("TypeClient"=c(0,1) ,"Classe"=c(0,1),"RetardDepartMn" = c(0.24,0.24)),
+                      type= "response"
+                      )
+diff(predictionslRTCClasse1)
+#en rentrant retard dans modèle légèrement supérieur
+```
+</details>
+
+
+
+
+## 4.3. Qualité et correction des biais d'omission éventuels
+
+Ci-dessous les principaux modèles probit et logit effectués, accompagnés d'un indicateur de qualité. Le R2 de Nagelkerke reflète le maximum de vraissemblance d'un modèle, c'est-à-dire la probabilité de retrouver l'échantillon de l'étude à partir d'un modèle.<br>
+
+En comparant nos modèles probit et logit principaux, on constate que les modèles logit (MLG) ont des coefficients plus significatifs pour la prédiction de la satisfaction d'un client à la fois bénéficiant d'un programme de fidélité _et_ voyageant en business class. Autrement, les coefficients sont tous significatifs et tous de la même nature (positifs ou négatifs). On retrouve l'impact négatif du retard sur la probabilité de satisfaction et l'impact positif des programmes de fidélité et d'être en business class.
+
+```{r}
+tab_model(MP1,MLG1,MP4,MLG4,MP7,MLG7,MP8, MLG8,
+          show.r2=TRUE, #Nagelkerke
+          transform = NULL,
+          show.ci = FALSE,
+          show.se = FALSE,
+          vcov.fun = "vcovHC",
+          vcov.type = "HC1",
+          dv.labels = c("MP1 (Retard)","MLG1 (Retard)","MP4 (Retard + TC + Classe)", "MLG4 (Retard + TC + Classe)", "MP7 (TC et Classe)","MLG7 (TC et Classe)","MP8 (Retard + (TC et Classe))","MLG8 (Retard + (TC et Classe)"),
+          digits = 3,
+          p.style = "stars"
+          )
+```
+
+Nous allons tenter de les corriger de tout biais d'omission possible à partir des variables de la base de données mise à notre disposition.
+
+```{r}
+#changement de facteur à num pour variables niveau
+al$ConfortSiege<-as.numeric(al$ConfortSiege)
+al$PraticiteHoraires<-as.numeric(al$PraticiteHoraires)
+al$Nourriture<-as.numeric(al$Nourriture)
+al$LocalisationPorte<-as.numeric(al$LocalisationPorte)
+al$WifiVol<-as.numeric(al$WifiVol)
+al$DivertissementVol<-as.numeric(al$DivertissementVol)
+al$AideEnLigne<-as.numeric(al$AideEnLigne)
+al$ReservationInternet<-as.numeric(al$ReservationInternet)
+al$ServiceVol<-as.numeric(al$ServiceVol)
+al$EspaceJambes<-as.numeric(al$EspaceJambes)
+al$GestionBagages<-as.numeric(al$GestionBagages)
+al$Enregistrement<-as.numeric(al$Enregistrement)
+al$Proprete<-as.numeric(al$Proprete)
+al$EmbarquementEnLigne<-as.numeric(al$EmbarquementEnLigne)
+```
+
+Ci-dessous le résumé statistique des nouvelles variables qui nous intégrons à nos modèles. 
+
+```{r}
+#Présentation
+statal<-get_summary_stats(al,
+                            show = c("mean","sd","min","max"))
+#Tableau html
+kable(statal,digits = 3) %>%
+  kable_classic()
+```
+
+```{r}
+# + variables client
+LGVA1<-glm(satisfaction~RetardDepartMn + (TypeClient*Classe) + Genre + Age,
+         family= binomial(link="logit"),
+                data= al)
+
+# + variables vol
+LGVA2<-glm(satisfaction~RetardDepartMn + (TypeClient*Classe) + TypeVoyage + DistanceVol,
+         family= binomial(link="logit"),
+                data= al)
+
+# + variables aspects techniques et organisationnels
+LGVA3<-glm(satisfaction~RetardDepartMn + (TypeClient*Classe)+PraticiteHoraires+LocalisationPorte+ReservationInternet+GestionBagages+EmbarquementEnLigne,
+         family= binomial(link="logit"),
+                data= al)
+
+# + variables qualité service et relationnel
+LGVA4<-glm(satisfaction~RetardDepartMn + (TypeClient*Classe)+ServiceVol+Enregistrement,
+         family= binomial(link="logit"),
+                data= al)
+
+# + variables confort vol
+LGVA5<-glm(satisfaction~RetardDepartMn + (TypeClient*Classe)+ConfortSiege+Nourriture+WifiVol+DivertissementVol+Proprete,
+         family= binomial(link="logit"),
+                data= al)
+
+# + tout sauf confort vol
+LGVA6<-glm(satisfaction~RetardDepartMn + (TypeClient*Classe)+ Genre + Age + TypeVoyage+DistanceVol+PraticiteHoraires+LocalisationPorte+ReservationInternet+GestionBagages+EmbarquementEnLigne+ServiceVol+Enregistrement,
+         family= binomial(link="logit"),
+                data= al)
+
+#tout y compris confort vol
+LGVA7<-glm(satisfaction~RetardDepartMn + (TypeClient*Classe)+ Genre + Age + TypeVoyage+DistanceVol+PraticiteHoraires+LocalisationPorte+ReservationInternet+GestionBagages+EmbarquementEnLigne+ServiceVol+Enregistrement+ConfortSiege+Nourriture+WifiVol+DivertissementVol+Proprete,
+         family= binomial(link="logit"),
+                data= al)
+```
+
+Nous faisons le choix d'améliorer le modèle logit 8 (MLG8), qui prend en compte la variable conjointe d'être en business class et de bénéficier d'un programme de satisfaction, tout en ayant une meilleure significativité que le modèle probit.<br>
+
+Voici ci-dessous les estimations pour les différents modèles logit améliorés, prenant en compte un nombre différent de variables possiblement à l'origine d'un biais de variables omises.<br>
+Les variables ajoutés à LGVA1 sont le Genre et l'âge (Variables client).<br>
+Les variables ajoutés à LGVA2 sont le Type de voyage et la Distance (Variables vol).<br>
+Les variables ajoutés à LGVA3 sont la praticité des horaires, la localisation de la porte d'embarquement, la facilité de réservation internet, la gestion des bagages et l'embarquement en ligne (Aspects techniques et organisationnels).<br>
+Les variables ajoutés à LGVA4 sont le service pendant le vol et à l'enregistrement (service et relationnel).<br>
+Les variables ajoutés à LGVA5 sont le confort du siège, la nourriture, le wifi du vol, le divertissement pendant le vol et la propreté.<br>
+Les variables ajoutés à LGVA6 sont toutes les précédentes sauf les variables de confort.<br>
+Les variables ajoutés à LGVA7 sont toutes les précédentes, y compris les variables de confort.<br>
+
+```{r}
+tab_model(MLG8, LGVA1, LGVA2, LGVA3, LGVA4,LGVA5,LGVA6,LGVA7,
+          show.r2=TRUE, #Nagelkerke
+          transform = NULL,
+          show.ci = FALSE,
+          show.se = FALSE,
+          vcov.fun = "vcovHC",
+          vcov.type = "HC1",
+          dv.labels = c("MLG8 (Retard + (TC et Classe)","LGVA1 (LG8 + variables client)", "LGVA2 (LG8 + variables vol)", "LGVA3 (LG8 + aspects techniques et organisationels)","LGVA4 (LG8 + service et relationnel)", "LGVA5 (LG8 + confort vol)", "LGVA6 (LG8 + tout sauf confort vol)","LGVA7 (LG8 + tout)"),
+          digits = 3,
+          p.style = "stars")
+
+
+```
+
+Le type de client et la classe sont toujours les variables les plus déterminantes de la probabilité de satisfaction, quelles que soit les variables prises en compte. On en déduit qu'il n'y avait pas de biais variable omise, même si l'effet de la classe de voyage a été légèrement diminué. L'effet de l'appartenance à un programme de fidélité a même été augmenté par rapport au modèle logit de base. <br>
+
+On constate que l'âge et la distance du vol n'ont pas d'impact sur la probabilité de satisfaction.<br>
+
+La variable conjointe de bénéficier à la fois d'un programme de fidélité et de voyager en business class joue souvent un petit effet négatif sur la probabilité de satisfaction, même s'il n'est pas toujours très significatif. Cet effet négatif léger (entre -0.08 et-0.3) s'inverse pour les modèles incluant uniquement les variables de relationnel et de confort, par rapport au modèle logit de base. Cela est sûrement dû à un différentiel de service et de confort pour les clients bénéficiant à la fois d'un programme de fidélité et voyageant en business class.
+
+Les variables nouvellement intégrées contribuant le plus au maximum de vraisemblance (MLE) sont :<br>
+- le confort du vol : +0.25 (0.424-1.174)<br>
+A titre de comparaison, le fait d'intégrer toutes les autres variables, sauf celles du confort du vol, augmente le MLE de + 0.24 (0.421-1.174).<br>
+- les aspects techniques et organisationnels : +0.15.<br>
+- le service et le relationnel : +0.11.<br>
+- les variables client : +0.06.<br>
+- les variables du vol : +0.008.<br>
+
+Comme on pouvait s'y attendre, c'est le modèle prenant en compte la majeure partie des variables de la base de donnée (sauf le retard à l'arrivée qui est en majeure partie du au retard au départ), est celui qui maximise le MLE. Le modèle LGVA7 a un MLE de 0.510.<br>
+
+Il est intéressant de noter qu'être un homme diminue la probabilité de satisfaction : -1, ce qui est important par rapport au retard (-0.28). Un autre effet diminuant la probabilité de satisfaction est le fait de voyager personnellement (-0.77). Cela est probablement lié au fait que les voyages professionnels se font plus souvent en business class, qui est un déterminant majeur à la satisfaction.<br>
+
+
+Maintenant, nous allons calculer les différences de probabilités de satisfaction pour chacun de ces modèles.<br>
+
+```{r}
+# les data frames
+
+#supression variables inutiles
+al$RetardArriveeMn<-NULL
+al$Retardtotal<-NULL
+#new1 = toute chose = par ailleurs. La différence de probabilité de satisfaction due au fait de bénéficier d'un programme de fidélité
+new1<-data.frame(
+  "Genre"= mean(al$Genre),
+  "TypeClient"=c(0,1),
+  "Age"=mean(al$Age),
+  "TypeVoyage"=mean(al$TypeVoyage),
+  "Classe"=c(0,0),
+  "DistanceVol"=mean(al$DistanceVol),
+  "ConfortSiege"=mean(al$ConfortSiege),
+  "PraticiteHoraires"=mean(al$PraticiteHoraires),
+  "Nourriture"=mean(al$Nourriture),
+  "LocalisationPorte"=mean(al$LocalisationPorte),
+  "WifiVol"=mean(al$WifiVol),
+  "DivertissementVol"=mean(al$DivertissementVol),
+  "AideEnLigne"=mean(al$AideEnLigne),
+  "ReservationInternet"=mean(al$ReservationInternet),
+  "ServiceVol"=mean(al$ServiceVol),
+  "EspaceJambes"=mean(al$EspaceJambes),
+  "GestionBagages"=mean(al$GestionBagages),
+  "Enregistrement"=mean(al$Enregistrement),
+  "Proprete"=mean(al$Proprete),
+  "EmbarquementEnLigne"=mean(al$EmbarquementEnLigne),
+  "RetardDepartMn"=mean(al$RetardDepartMn)
+)
+#La différence de probabilité de satisfaction due au fait de voyager en business class
+new2<-data.frame(
+  "Genre"= mean(al$Genre),
+  "TypeClient"=c(0,0),
+  "Age"=mean(al$Age),
+  "TypeVoyage"=mean(al$TypeVoyage),
+  "Classe"=c(0,1),
+  "DistanceVol"=mean(al$DistanceVol),
+  "ConfortSiege"=mean(al$ConfortSiege),
+  "PraticiteHoraires"=mean(al$PraticiteHoraires),
+  "Nourriture"=mean(al$Nourriture),
+  "LocalisationPorte"=mean(al$LocalisationPorte),
+  "WifiVol"=mean(al$WifiVol),
+  "DivertissementVol"=mean(al$DivertissementVol),
+  "AideEnLigne"=mean(al$AideEnLigne),
+  "ReservationInternet"=mean(al$ReservationInternet),
+  "ServiceVol"=mean(al$ServiceVol),
+  "EspaceJambes"=mean(al$EspaceJambes),
+  "GestionBagages"=mean(al$GestionBagages),
+  "Enregistrement"=mean(al$Enregistrement),
+  "Proprete"=mean(al$Proprete),
+  "EmbarquementEnLigne"=mean(al$EmbarquementEnLigne),
+  "RetardDepartMn"=mean(al$RetardDepartMn)
+)
+
+new3<-data.frame(
+  "Genre"= mean(al$Genre),
+  "TypeClient"=c(0,1),
+  "Age"=mean(al$Age),
+  "TypeVoyage"=mean(al$TypeVoyage),
+  "Classe"=c(0,1),
+  "DistanceVol"=mean(al$DistanceVol),
+  "ConfortSiege"=mean(al$ConfortSiege),
+  "PraticiteHoraires"=mean(al$PraticiteHoraires),
+  "Nourriture"=mean(al$Nourriture),
+  "LocalisationPorte"=mean(al$LocalisationPorte),
+  "WifiVol"=mean(al$WifiVol),
+  "DivertissementVol"=mean(al$DivertissementVol),
+  "AideEnLigne"=mean(al$AideEnLigne),
+  "ReservationInternet"=mean(al$ReservationInternet),
+  "ServiceVol"=mean(al$ServiceVol),
+  "EspaceJambes"=mean(al$EspaceJambes),
+  "GestionBagages"=mean(al$GestionBagages),
+  "Enregistrement"=mean(al$Enregistrement),
+  "Proprete"=mean(al$Proprete),
+  "EmbarquementEnLigne"=mean(al$EmbarquementEnLigne),
+  "RetardDepartMn"=mean(al$RetardDepartMn)
+)
+
+
+```
+
+
+Voici un tableau récapitulatif des résultats. Nous précisons d'abord le modèle; puis la différence de probabilité de satisfaction _due au fait de bénéficier d'un programme de fidélité_ (toute chose égale par ailleurs, classe = 0); puis la différence de probabilité de satisfaction _due au fait de voyager en business class_ (toute chose égale par ailleurs, type client = 0); puis la différence de probabilité de satisfaction _due au fait de bénéficier d'un programme de fidélité ET de voyager en business class_ (toute chose égale par ailleurs).<br>
+
+![](Images/tableau.JPG)
+<br>
+
+Finalement, quel que soit le modèle, c'est le fait de bénéficier d'un programme de fidélité qui augmente le plus la probabilité d'être satisfait. Le confort de vol est également très important, et lorsqu'on l'intègre dans un modèle cela diminue l'impact du fait de bénéficier d'un programme de fidélité ou de voyager en business class sur la satisfaction. Cependant ces 2 variables sont les plus déterminantes pour la satisfaction.<br>
+
+<details>
+- modèle MLG8<br>
+La différence de probabilité de satisfaction _due au fait de bénéficier d'un programme de fidélité_ est de 1.69.<br>
+La différence de probabilité de satisfaction _due au fait de voyager en business class_ est de 1.39.<br>
+La différence de probabilité de satisfaction _due au fait de bénéficier d'un programme de fidélité et/ou de voyager en business class_ est de 2.99.<br>
+
+```{r}
+#MLG8
+predictions <- predict(MLG8, newdata = new1)
+diff(predictions)
+#MLG8
+predictions <- predict(MLG8, newdata = new2)
+diff(predictions)
+#MLG8
+predictions <- predict(MLG8, newdata = new3)
+diff(predictions)
+```
+- modèle LGVA1 <br>
+La différence de probabilité de satisfaction _due au fait de bénéficier d'un programme de fidélité_ est de 1.85.<br>
+La différence de probabilité de satisfaction _due au fait de voyager en business class_ est de 1.5.<br>
+La différence de probabilité de satisfaction _due au fait de bénéficier d'un programme de fidélité ET de voyager en business class_ est de 3.25.<br>
+```{r}
+#LGVA1 : 8 + variables client
+predictions <- predict(LGVA1, newdata = new1)
+diff(predictions)
+#LGVA1 : 8 + variables client
+predictions <- predict(LGVA1, newdata = new2)
+diff(predictions)
+#LGVA1 : 8 + variables client
+predictions <- predict(LGVA1, newdata = new3)
+diff(predictions)
+```
+
+-modèle LGVA2<br>
+La différence de probabilité de satisfaction _due au fait de bénéficier d'un programme de fidélité_ est de 1.84.<br>
+La différence de probabilité de satisfaction _due au fait de voyager en business class_ est de 1.41.<br>
+La différence de probabilité de satisfaction _due au fait de bénéficier d'un programme de fidélité ET de voyager en business class_ est de 3.06.<br>
+```{r}
+#LGVA2 : 8 + variables vol
+predictions <- predict(LGVA2, newdata = new1)
+diff(predictions)
+#LGVA2 : 8 + variables vol
+predictions <- predict(LGVA2, newdata = new2)
+diff(predictions)
+#LGVA2 : 8 + variables vol
+predictions <- predict(LGVA2, newdata = new3)
+diff(predictions)
+```
+
+-modèle LGVA3<br>
+La différence de probabilité de satisfaction _due au fait de bénéficier d'un programme de fidélité_ est de 1.87.<br>
+La différence de probabilité de satisfaction _due au fait de voyager en business class_ est de 1.43.<br>
+La différence de probabilité de satisfaction _due au fait de bénéficier d'un programme de fidélité ET de voyager en business class_ est de 3.11.<br>
+```{r}
+#LGVA3 : 8+ variables aspects techniques et organisationnels
+predictions <- predict(LGVA3, newdata = new1)
+diff(predictions)
+#LGVA3 : 8+ variables aspects techniques et organisationnels
+predictions <- predict(LGVA3, newdata = new2)
+diff(predictions)
+#LGVA3 : 8+ variables aspects techniques et organisationnels
+predictions <- predict(LGVA3, newdata = new3)
+diff(predictions)
+```
+
+- modèle LGVA4<br>
+La différence de probabilité de satisfaction _due au fait de bénéficier d'un programme de fidélité_ est de 1.58.<br>
+La différence de probabilité de satisfaction _due au fait de voyager en business class_ est de 0.89.<br>
+La différence de probabilité de satisfaction _due au fait de bénéficier d'un programme de fidélité ET de voyager en business class_ est de 2.82.<br>
+```{r}
+#LGVA4 : 8+ variables qualité service et relationnel
+predictions <- predict(LGVA4, newdata = new1)
+diff(predictions)
+#LGVA4 : 8+ variables qualité service et relationnel
+predictions <- predict(LGVA4, newdata = new2)
+diff(predictions)
+#LGVA4 : 8+ variables qualité service et relationnel
+predictions <- predict(LGVA4, newdata = new3)
+diff(predictions)
+```
+
+- modèle LGVA5<br>
+La différence de probabilité de satisfaction _due au fait de bénéficier d'un programme de fidélité_ est de 1.35.<br>
+La différence de probabilité de satisfaction _due au fait de voyager en business class_ est de 0.97.<br>
+La différence de probabilité de satisfaction _due au fait de bénéficier d'un programme de fidélité ET de voyager en business class_ est de 2.54.<br>
+```{r}
+#LGVA5 : 8+ variables confort vol
+predictions <- predict(LGVA5, newdata = new1)
+diff(predictions)
+#LGVA5 : 8+ variables confort vol
+predictions <- predict(LGVA5, newdata = new2)
+diff(predictions)
+#LGVA5 : 8+ variables confort vol
+predictions <- predict(LGVA5, newdata = new3)
+diff(predictions)
+```
+
+- modèle LGVA6<br>
+La différence de probabilité de satisfaction _due au fait de bénéficier d'un programme de fidélité_ est de 2.53.<br>
+La différence de probabilité de satisfaction _due au fait de voyager en business class_ est de 1.16.<br>
+La différence de probabilité de satisfaction _due au fait de bénéficier d'un programme de fidélité ET de voyager en business class_ est de 3.32.<br>
+```{r}
+#LGVA6 : 8+ tout sauf confort vol
+predictions <- predict(LGVA6, newdata = new1)
+diff(predictions)
+#LGVA6 : 8+ tout sauf confort vol
+predictions <- predict(LGVA6, newdata = new2)
+diff(predictions)
+#LGVA6 : 8+ tout sauf confort vol
+predictions <- predict(LGVA6, newdata = new3)
+diff(predictions)
+
+```
+
+-modèle LGVA7<br>
+La différence de probabilité de satisfaction _due au fait de bénéficier d'un programme de fidélité_ est de 2.14.<br>
+La différence de probabilité de satisfaction _due au fait de voyager en business class_ est de 0.97.<br>
+La différence de probabilité de satisfaction _due au fait de bénéficier d'un programme de fidélité ET de voyager en business class_ est de 2.86.<br>
+```{r}
+#LGVA7 : 8 + tout y compris confort vol
+predictions <- predict(LGVA7, newdata = new1)
+diff(predictions)
+#LGVA7 : 8 + tout y compris confort vol
+predictions <- predict(LGVA7, newdata = new2)
+diff(predictions)
+#LGVA7 : 8 + tout y compris confort vol
+predictions <- predict(LGVA7, newdata = new3)
+diff(predictions)
+```
+</details>
+
+
+# 5. Conclusion
+
+On peut regretter qu'il n'y ait pas le prix de billet comme variable de la base de données, qui est un des déterminant de la satisfaction d'après notre revue de littérature. Cela limite la validité interne des résulats car nous n'avons pas pris en compte ce biais de possible variable omise. On peut aussi regretter qu'il n'y ait pas de mesure de l'intention de fidélité qui pourrait être analysée à travers le prisme des déterminants de la satisfaction. Par intention de fidélité nous entendons une question telle que : si vous deviez reprendre l'avion la semaine prochaine, reprendriez-vous la même compagnie sur une échelle de 0 à 5?
+
+Mais de notre étude il ressort qu'il est très important pour Invistico de développer la personnalisation de son offre pour augmenter la satisfaction et ultimement la fidélité de ses clients, ce qui est indispensable dans un environnement incertain et compétitif.
+
+
+
+# Annexe : code
+
+```{r}
+#Autres résultats
+
+```
+
+Partie 4.1
+
+```{r, echo=TRUE, eval=FALSE}
+al <- read.table(file = "Data/airline.csv", # nom du fichier
+                  sep = ",",                 # séparateur
+                  header = TRUE,             # variables en première ligne
+                # row.names = 1,              # individus en première colonne
+                 check.names = F) 
+
+#Recodage des variables en facteur
+al$satisfaction<-as.factor(al$satisfaction)
+#en numérique -1 pour avoir [0,1]
+al$satisfaction<-as.numeric(al$satisfaction)-1 #0 = non satisfait, 1 = satisfait
+
+al$Gender<-as.factor(al$Gender)
+al$Gender<-as.numeric(al$Gender)-1 #0 = Female, 1 = male
+
+al$`Customer Type`<-as.factor(al$`Customer Type`)
+str(al$`Customer Type`)
+#al$Class<-relevel(al$Class,ref="1")
+al$`Customer Type`<-as.numeric(al$`Customer Type`)-1 # 0 = déloyal, 1 = loyal
+al$`Type of Travel`<-as.factor(al$`Type of Travel`)
+al$`Type of Travel`<-as.numeric(al$`Type of Travel`)-1 #0 = professionnel, 1 = personnel
+
+al$Class<-as.factor(al$Class)
+levels(al$Class)<-c(1,2,2) # class de 3 levels à 2. 1 = business, 2 = eco ou eco plus
+#classé par ordre alphabétique, il faut changer
+al$Class<-relevel(al$Class,ref="2") #1 = Eco, 2 = Business
+al$Class<-as.numeric(al$Class,ref="2")-1 
+#0 = Eco ou Eco +, 1 = Business
+
+al$`Seat comfort`<-as.factor(al$`Seat comfort`)
+al$`Departure/Arrival time convenient`<-as.factor(al$`Departure/Arrival time convenient`)
+al$`Food and drink`<-as.factor(al$`Food and drink`)
+al$`Gate location`<-as.factor(al$`Gate location`)
+al$`Inflight wifi service`<-as.factor(al$`Inflight wifi service`)
+al$`Inflight entertainment`<-as.factor(al$`Inflight entertainment`)
+al$`Online support`<-as.factor(al$`Online support`)
+al$`Ease of Online booking`<-as.factor(al$`Ease of Online booking`)
+al$`On-board service`<-as.factor(al$`On-board service`)
+al$`Leg room service`<-as.factor(al$`Leg room service`)
+al$`Baggage handling`<-as.factor(al$`Baggage handling`)
+#PAS DE 0
+al$`Checkin service`<-as.factor(al$`Checkin service`)
+al$Cleanliness<-as.factor(al$Cleanliness)
+al$`Online boarding`<-as.factor(al$`Online boarding`)
+
+#age en numérique
+al$Age<-as.numeric(al$Age)
+
+#flight distance en numérique
+al$`Flight Distance`<-as.numeric(al$`Flight Distance`)
+al$`Departure Delay in Minutes`<-as.numeric(al$`Departure Delay in Minutes`)
+al$`Arrival Delay in Minutes`<-as.numeric(al$`Arrival Delay in Minutes`)
+
+#création variable retard total
+al$`Retardtotal`<-(al$`Departure Delay in Minutes`+al$`Arrival Delay in Minutes`)
+
+#Enlever espaces des variables pour qu'elles s'affichent tableaux de régression
+#Renommer
+colnames(al)[colnames(al) %in% c("Gender","Customer Type","Type of Travel","Class","Flight Distance","Seat comfort","Departure/Arrival time convenient","Food and drink","Gate location","Inflight wifi service","Inflight entertainment","Online support","Ease of Online booking","On-board service","Leg room service","Baggage handling","Checkin service","Cleanliness","Online boarding","Departure Delay in Minutes","Arrival Delay in Minutes"    )] <-c("Genre","TypeClient","TypeVoyage","Classe","DistanceVol","ConfortSiege","PraticiteHoraires","Nourriture","LocalisationPorte","WifiVol","DivertissementVol","AideEnLigne","ReservationInternet","ServiceVol","EspaceJambes","GestionBagages","Enregistrement","Proprete","EmbarquementEnLigne","RetardDepartMn","RetardArriveeMn")
+
+#éliminer les NA
+al<-al[complete.cases(al), ]
+str(al$Classe)
+
+#Modèles linéaires
+ML1<-lm(satisfaction~RetardDepartMn, data = al)
+ML2<-lm(satisfaction~RetardDepartMn+ TypeClient, data = al)
+ML3<-lm(satisfaction~RetardDepartMn+ Classe, data = al)
+ML4<-lm(satisfaction~RetardDepartMn+ TypeClient + Classe, data = al)
+ML5<-lm(satisfaction~TypeClient, data = al)
+ML6<-lm(satisfaction~Classe, data = al)
+ML7<-lm(satisfaction~(TypeClient*Classe), data = al)
+#ML8<-lm(satisfaction~RetardDepartMn(TypeClient*Classe), data = al)
+
+p1 <- plot(x=al$RetardDepartMn,
+     y=al$satisfaction,
+     xlab="Retard en minutes",
+     ylab="Satisfaction du client",
+    main = " Satisfaction selon le retard en minutes
+    (au départ)",
+     cex = 0.6,
+     pch = 19,
+    ylim = c(-0.4, 1.4),
+     col = "black")
+#ajouter les axes horizontaux et du texte
+abline(h=1,  #hauteur
+       lty = 2, #type de pointillé
+       col = "darkred")
+abline(h=0,
+       lty = 2,  #type pointillé
+       col = "darkred")
+text(500, #pos absisses
+     0.9, #position ordonnées
+     cex = 0.8, #taille
+     "Satisfait")
+text(500, #position absisses 
+     -0.1, #position du texte ordonnées
+     cex=0.8, #taille
+     "Non satisfait")
+abline(ML1, 
+       col ="steelblue", 
+       lwd = 3,5 #largeur du trait
+       )
+
+p2<- plot(x=al$TypeClient,
+     y=al$satisfaction,
+     xlab="Client fidèle ou non (1 = fidèle)",
+     ylab="Satisfaction du client",
+    main = "Satisfaction selon l'appartenance 
+    à un programme de fidélité",
+     cex = 0.6,
+     pch = 19,
+    ylim = c(-0.4, 1.4),
+     col = "black")
+#ajouter les axes horizontaux et du texte
+abline(h=1,  #hauteur
+       lty = 2, #type de pointillé
+       col = "darkred")
+abline(h=0,
+       lty = 2,  #type pointillé
+       col = "darkred")
+text(0.8, #pos absisses
+     0.9, #position ordonnées
+     cex = 0.8, #taille
+     "Satisfait")
+text(0.8, #position absisses 
+     -0.1, #position du texte ordonnées
+     cex=0.8, #taille
+     "Non satisfait")
+abline(ML5, 
+       col ="steelblue", 
+       lwd = 3,5 #largeur du trait
+       )
+
+p3<- plot(x=al$Classe,
+     y=al$satisfaction,
+     xlab="Classe de voyage (1= Business, 0= Eco ou Eco +)",
+     ylab="Satisfaction du client",
+    main = "Satisfaction selon la classe de voyage",
+     cex = 0.6,
+     pch = 19,
+    ylim = c(-0.4, 1.4),
+     col = "black")
+
+#ajouter les axes horizontaux et du texte
+abline(h=1,  #hauteur
+       lty = 2, #type de pointillé
+       col = "darkred")
+abline(h=0,
+       lty = 2,  #type pointillé
+       col = "darkred")
+text(0.8, #pos absisses
+     0.9, #position ordonnées
+     cex = 0.8, #taille
+     "Satisfait")
+text(0.8, #position absisses 
+     -0.1, #position du texte ordonnées
+     cex=0.8, #taille
+     "Non satisfait")
+abline(ML6, 
+       col ="steelblue", 
+       lwd = 3,5 #largeur du trait
+       )
+
+tab_model(ML1,ML2,ML3,ML4,ML5,ML6,ML7,
+          show.r2 = F,
+          show.se = F,
+          show.ci=F,
+          p.style ="stars",
+          digits=3,
+          vcov.fun="vcovHC",
+          vcov.type = "HC1",
+          dv.labels = c("ML1 (Retard)","ML2 (Retard+TC)","ML3 (Retard + Classe)","ML4 (Retard + TC + Classe)","ML5 (TC)","ML6 (Classe)","ML7 (TC et Classe)"))
+
+```
+
+
+Partie 4.2
+
+```{r, echo=TRUE, eval=FALSE}
+#modèles probit
+MP1<-glm(satisfaction~RetardDepartMn,
+                family= binomial(link="probit"),
+                data= al)
+MP2<-glm(satisfaction~RetardDepartMn+TypeClient,
+                family= binomial(link="probit"),
+                data= al)
+MP3<-glm(satisfaction~RetardDepartMn+Classe,
+                family= binomial(link="probit"),
+                data= al)
+MP4<-glm(satisfaction~RetardDepartMn+TypeClient+Classe,
+                family= binomial(link="probit"),
+                data= al)
+MP5<-glm(satisfaction~TypeClient,
+         family= binomial(link="probit"),
+                data= al)
+MP6<-glm(satisfaction~Classe,
+         family= binomial(link="probit"),
+                data= al)
+MP7<-glm(satisfaction~TypeClient*Classe,
+         family= binomial(link="probit"),
+                data= al)
+MP8<-glm(satisfaction~RetardDepartMn + (TypeClient*Classe),
+         family= binomial(link="probit"),
+                data= al)
+
+tab_model(MP1,MP2,MP3,MP4,MP5,MP6,MP7,MP8,
+          show.r2 = F,
+          transform = NULL,
+          show.se = F,
+          show.ci=F,
+          p.style ="stars",
+          digits=3,
+          vcov.fun="vcovHC",
+          vcov.type = "HC1",
+          dv.labels = c("MP1 (Retard)","MP2 (Retard+TC)","MP3 (Retard + Classe)","MP4 (Retard + TC + Classe)", "MP5 (TC)", "MP6 (Classe)", "MP7 (TC et Classe)","MP8 (Retard + (TC et Classe)) "))
+
+#modèles logit
+MLG1<-glm(satisfaction~RetardDepartMn,
+                family= binomial(link="logit"),
+                data= al)
+MLG2<-glm(satisfaction~RetardDepartMn+TypeClient,
+                family= binomial(link="logit"),
+                data= al)
+MLG3<-glm(satisfaction~RetardDepartMn+Classe,
+                family= binomial(link="logit"),
+                data= al)
+MLG4<-glm(satisfaction~RetardDepartMn+TypeClient+Classe,
+                family= binomial(link="logit"),
+                data= al)
+MLG5<-glm(satisfaction~TypeClient,
+         family= binomial(link="logit"),
+                data= al)
+MLG6<-glm(satisfaction~Classe,
+         family= binomial(link="logit"),
+                data= al)
+MLG7<-glm(satisfaction~TypeClient*Classe,
+         family= binomial(link="logit"),
+                data= al)
+MLG8<-glm(satisfaction~RetardDepartMn + (TypeClient*Classe),
+         family= binomial(link="logit"),
+                data= al)
+
+tab_model(MLG1,MLG2,MLG3,MLG4,MLG5,MLG6,MLG7,MLG8,
+          show.r2 = F,
+          transform = NULL,
+          show.se = F,
+          show.ci=F,
+          p.style ="stars",
+          digits=3,
+          vcov.fun="vcovHC",
+          vcov.type = "HC1",
+          dv.labels = c("MLG1 (Retard)","MLG2 (Retard+TC)","MLG3 (Retard + Classe)","MLG4 (Retard + TC + Classe)", "MLG5 (TC)", "MLG6 (Classe)", "MLG7 (TC et Classe)","MLG8 (Retard + (TC et Classe)) "))
+
+
+#Visualisation probit
+plot(x=al$RetardDepartMn,
+     y=al$satisfaction,
+     xlab="Retard au départ en heures",
+     ylab="Satisfaction du client",
+    main = " Modèle Probit de la probabilité de satisfaction selon le retard en heures",
+     cex = 0.6,
+     pch = 19,
+    ylim = c(-0.4, 1.4),
+     col = "black")
+
+#ajouter les axes horizontaux et du texte
+abline(h=1,  #hauteur
+       lty = 2, #type de pointillé
+       col = "darkred")
+abline(h=0,
+       lty = 2,  #type pointillé
+       col = "darkred")
+text(500, #pos absisses
+     0.9, #position ordonnées
+     cex = 0.8, #taille
+     "Satisfait")
+text(500, #position absisses 
+     -0.1, #position du texte ordonnées
+     cex=0.8, #taille
+     "Non satisfait")
+#ajouter la fonction de régression
+x <- seq(0,2000,0.01)  #séquence des points de la droite (début,fin,incrémentation)
+y <- predict(MP1, 
+             list(RetardDepartMn=x), #comprends pas cette ligne
+             type = "response") #comprends pas cette ligne
+lines (x,y, #coordonées
+       lwd= 3.5,
+       col= "steelblue")
+
+#Visualisations logit et logit + probit
+
+#Que logit
+plot(x=al$RetardDepartMn,
+     y=al$satisfaction,
+     xlab="Retard au départ en minutes",
+     ylab="Satisfaction du client",
+    main = " Modèle Logit de la probabilité
+    de satisfaction selon le retard en minutes",
+     cex = 0.6,
+     pch = 19,
+    ylim = c(-0.4, 1.4),
+     col = "black")
+
+#ajouter les axes horizontaux et du texte
+abline(h=1,  #hauteur
+       lty = 2, #type de pointillé
+       col = "darkred")
+abline(h=0,
+       lty = 2,  #type pointillé
+       col = "darkred")
+text(500, #pos absisses
+     0.9, #position ordonnées
+     cex = 0.8, #taille
+     "Satisfait")
+text(500, #position absisses 
+     -0.1, #position du texte ordonnées
+     cex=0.8, #taille
+     "Non satisfait")
+#ajouter la fonction de régression
+x <- seq(0,2000,0.01)  #séquence des points de la droite (début,fin,incrémentation)
+y_logit <- predict(MLG1, 
+             list(RetardDepartMn=x), #comprends pas cette ligne
+             type = "response") #comprends pas cette ligne
+lines (x,y_logit,
+       lwd=3, #largeur de la ligne
+       col="black",
+       lty=2)   # type de ligne
+
+
+#Probit et logit
+plot(x=al$RetardDepartMn,
+     y=al$satisfaction,
+     xlab="Retard au départ en minutes",
+     ylab="Satisfaction du client",
+    main = " Modèles Probit et Logit de la probabilité de satisfaction
+    selon le retard en minutes",
+     cex = 0.6,
+     pch = 19,
+    ylim = c(-0.4, 1.4),
+     col = "black")
+
+#ajouter les axes horizontaux et du texte
+abline(h=1,  #hauteur
+       lty = 2, #type de pointillé
+       col = "darkred")
+abline(h=0,
+       lty = 2,  #type pointillé
+       col = "darkred")
+text(500, #pos absisses
+     0.9, #position ordonnées
+     cex = 0.8, #taille
+     "Satisfait")
+text(500, #position absisses 
+     -0.1, #position du texte ordonnées
+     cex=0.8, #taille
+     "Non satisfait")
+#ajouter la fonction de régression
+x <- seq(0,2000,0.01)  #séquence des points de la droite (début,fin,incrémentation)
+y_probit <- predict(MP1, 
+             list(RetardDepartMn=x), #comprends pas cette ligne
+             type = "response") #comprends pas cette ligne
+y_logit <- predict(MLG1, 
+             list(RetardDepartMn=x), #comprends pas cette ligne
+             type = "response") #comprends pas cette ligne
+lines (x,y_logit,
+       lwd=3, #largeur de la ligne
+       col="black",
+       lty=2)   # type de ligne
+lines (x,y_probit, #coordonées
+       lwd= 3.5,
+       col= "steelblue")
+
+mean(al$RetardDepartMn)
+
+#PROBIT probabilité satisfaction client selon retard de départ (0-14mn, la moyenne)
+predictionsp1<- predict(MP1,
+                      newdata =data.frame("RetardDepartMn" = c(0,0.24)), #15mn
+                      type= "response"
+                      )
+diff(predictionsp1)
+
+predictionsp2<- predict(MP1,
+                      newdata =data.frame("RetardDepartMn" = c(0,4)),
+                      type= "response"
+                      )
+diff(predictionsp2)
+
+predictionsp3<- predict(MP1,
+                      newdata =data.frame("RetardDepartMn" = c(4,8)),
+                      type= "response"
+                      )
+diff(predictionsp3)
+
+predictionsp4<- predict(MP1,
+                      newdata =data.frame("RetardDepartMn" = c(0,15)),
+                      type= "response"
+                      )
+diff(predictionsp4)
+
+predictionsp5<- predict(MP1,
+                      newdata =data.frame("RetardDepartMn" = c(0,26)),
+                      type= "response"
+                      )
+diff(predictionsp5)
+
+predictionsp6<- predict(MP1,
+                      newdata =data.frame("RetardDepartMn" = c(15,26)),
+                      type= "response"
+                      )
+diff(predictionsp6)
+#ccl : retard pas seule variable
+
+#LOGITprobabilité satisfaction client selon retard de départ (0-14mn, la moyenne)
+predictionsl1<- predict(MLG1,
+                      newdata =data.frame("RetardDepartMn" = c(0,0.24)), #15mn
+                      type= "response"
+                      )
+diff(predictionsl1)
+
+predictionsl2<- predict(MLG1,
+                      newdata =data.frame("RetardDepartMn" = c(0,4)),
+                      type= "response"
+                      )
+diff(predictionsl2)
+
+predictionsl3<- predict(MLG1,
+                      newdata =data.frame("RetardDepartMn" = c(4,8)),
+                      type= "response"
+                      )
+diff(predictionsl3)
+
+predictionsl4<- predict(MLG1,
+                      newdata =data.frame("RetardDepartMn" = c(0,15)),
+                      type= "response"
+                      )
+diff(predictionsl4)
+
+predictionsl5<- predict(MLG1,
+                      newdata =data.frame("RetardDepartMn" = c(0,26)),
+                      type= "response"
+                      )
+diff(predictionsl5)
+
+predictionsl6<- predict(MLG1,
+                      newdata =data.frame("RetardDepartMn" = c(15,26)),
+                      type= "response"
+                      )
+diff(predictionsl6)
+#ccl : retard pas seule variable
+
+#satisfaction selon type client pour retard = 14 (moyenne)
+predictionspTC1<- predict(MP2,
+                      newdata =data.frame("TypeClient"=c(0,1),"RetardDepartMn" = c(0.24,0.24)),
+                      type= "response"
+                      )
+diff(predictionspTC1)
+
+#satisfaction selon classe pour retard = 14 (moyenne)
+predictionspClasse1<- predict(MP3,
+                      newdata =data.frame("Classe"=c(0,1),"RetardDepartMn" = c(0.24,0.24)),
+                      type= "response"
+                      )
+diff(predictionspClasse1)
+
+#satisfaction selon TC et classe pour retard = 14 (moyenne)
+predictionspTCClasse1<- predict(MP7,
+                      newdata =data.frame("TypeClient"=c(0,1) ,"Classe"=c(0,1),"RetardDepartMn" = c(0.24,0.24)),
+                      type= "response"
+                      )
+diff(predictionspTCClasse1)
+
+#satisfaction selon retard + (TC et classe) pour retard = 14 (moyenne)
+predictionspRTCClasse1<- predict(MP8,
+                      newdata =data.frame("TypeClient"=c(0,1) ,"Classe"=c(0,1),"RetardDepartMn" = c(0.24,0.24)),
+                      type= "response"
+                      )
+diff(predictionspRTCClasse1)
+#en rentrant retard dans modèle légèrement supérieur
+
+#satisfaction selon type client pour retard = 14 (moyenne)
+predictionslTC1<- predict(MLG2,
+                      newdata =data.frame("TypeClient"=c(0,1),"RetardDepartMn" = c(0.24,0.24)),
+                      type= "response"
+                      )
+diff(predictionslTC1)
+
+#satisfaction selon classe pour retard = 14 (moyenne)
+predictionslClasse1<- predict(MLG3,
+                      newdata =data.frame("Classe"=c(0,1),"RetardDepartMn" = c(0.24,0.24)),
+                      type= "response"
+                      )
+diff(predictionslClasse1)
+
+#satisfaction selon TC et classe pour retard = 14 (moyenne)
+predictionslTCClasse1<- predict(MLG7,
+                      newdata =data.frame("TypeClient"=c(0,1) ,"Classe"=c(0,1),"RetardDepartMn" = c(0.24,0.24)),
+                      type= "response"
+                      )
+diff(predictionslTCClasse1)
+
+#satisfaction selon retard + (TC et classe) pour retard = 14 (moyenne)
+predictionslRTCClasse1<- predict(MLG8,
+                      newdata =data.frame("TypeClient"=c(0,1) ,"Classe"=c(0,1),"RetardDepartMn" = c(0.24,0.24)),
+                      type= "response"
+                      )
+diff(predictionslRTCClasse1)
+#en rentrant retard dans modèle légèrement supérieur
+```
+
+
+
+Partie 4.3
+
+```{r, echo=TRUE, eval=FALSE}
+tab_model(MP1,MLG1,MP4,MLG4,MP7,MLG7,MP8, MLG8,
+          show.r2=TRUE, #Nagelkerke
+          transform = NULL,
+          show.ci = FALSE,
+          show.se = FALSE,
+          vcov.fun = "vcovHC",
+          vcov.type = "HC1",
+          dv.labels = c("MP1 (Retard)","MLG1 (Retard)","MP4 (Retard + TC + Classe)", "MLG4 (Retard + TC + Classe)", "MP7 (TC et Classe)","MLG7 (TC et Classe)","MP8 (Retard + (TC et Classe))","MLG8 (Retard + (TC et Classe)"),
+          digits = 3,
+          p.style = "stars"
+          )
+
+#changement de facteur à num pour variables niveau
+al$ConfortSiege<-as.numeric(al$ConfortSiege)
+al$PraticiteHoraires<-as.numeric(al$PraticiteHoraires)
+al$Nourriture<-as.numeric(al$Nourriture)
+al$LocalisationPorte<-as.numeric(al$LocalisationPorte)
+al$WifiVol<-as.numeric(al$WifiVol)
+al$DivertissementVol<-as.numeric(al$DivertissementVol)
+al$AideEnLigne<-as.numeric(al$AideEnLigne)
+al$ReservationInternet<-as.numeric(al$ReservationInternet)
+al$ServiceVol<-as.numeric(al$ServiceVol)
+al$EspaceJambes<-as.numeric(al$EspaceJambes)
+al$GestionBagages<-as.numeric(al$GestionBagages)
+al$Enregistrement<-as.numeric(al$Enregistrement)
+al$Proprete<-as.numeric(al$Proprete)
+al$EmbarquementEnLigne<-as.numeric(al$EmbarquementEnLigne)
+
+#Présentation
+statal<-get_summary_stats(al,
+                            show = c("mean","sd","min","max"))
+#Tableau html
+kable(statal,digits = 3) %>%
+  kable_classic()
+
+# + variables client
+LGVA1<-glm(satisfaction~RetardDepartMn + (TypeClient*Classe) + Genre + Age,
+         family= binomial(link="logit"),
+                data= al)
+
+# + variables vol
+LGVA2<-glm(satisfaction~RetardDepartMn + (TypeClient*Classe) + TypeVoyage + DistanceVol,
+         family= binomial(link="logit"),
+                data= al)
+
+# + variables aspects techniques et organisationnels
+LGVA3<-glm(satisfaction~RetardDepartMn + (TypeClient*Classe)+PraticiteHoraires+LocalisationPorte+ReservationInternet+GestionBagages+EmbarquementEnLigne,
+         family= binomial(link="logit"),
+                data= al)
+
+# + variables qualité service et relationnel
+LGVA4<-glm(satisfaction~RetardDepartMn + (TypeClient*Classe)+ServiceVol+Enregistrement,
+         family= binomial(link="logit"),
+                data= al)
+
+# + variables confort vol
+LGVA5<-glm(satisfaction~RetardDepartMn + (TypeClient*Classe)+ConfortSiege+Nourriture+WifiVol+DivertissementVol+Proprete,
+         family= binomial(link="logit"),
+                data= al)
+
+# + tout sauf confort vol
+LGVA6<-glm(satisfaction~RetardDepartMn + (TypeClient*Classe)+ Genre + Age + TypeVoyage+DistanceVol+PraticiteHoraires+LocalisationPorte+ReservationInternet+GestionBagages+EmbarquementEnLigne+ServiceVol+Enregistrement,
+         family= binomial(link="logit"),
+                data= al)
+
+#tout y compris confort vol
+LGVA7<-glm(satisfaction~RetardDepartMn + (TypeClient*Classe)+ Genre + Age + TypeVoyage+DistanceVol+PraticiteHoraires+LocalisationPorte+ReservationInternet+GestionBagages+EmbarquementEnLigne+ServiceVol+Enregistrement+ConfortSiege+Nourriture+WifiVol+DivertissementVol+Proprete,
+         family= binomial(link="logit"),
+                data= al)
+tab_model(MLG8, LGVA1, LGVA2, LGVA3, LGVA4,LGVA5,LGVA6,LGVA7,
+          show.r2=TRUE, #Nagelkerke
+          transform = NULL,
+          show.ci = FALSE,
+          show.se = FALSE,
+          vcov.fun = "vcovHC",
+          vcov.type = "HC1",
+          dv.labels = c("MLG8 (Retard + (TC et Classe)","LGVA1 (LG8 + variables client)", "LGVA2 (LG8 + variables vol)", "LGVA3 (LG8 + aspects techniques et organisationels)","LGVA4 (LG8 + service et relationnel)", "LGVA5 (LG8 + confort vol)", "LGVA6 (LG8 + tout sauf confort vol)","LGVA7 (LG8 + tout)"),
+          digits = 3,
+          p.style = "stars")
+
+# les data frames
+
+#supression variables inutiles
+al$RetardArriveeMn<-NULL
+al$Retardtotal<-NULL
+#new1 = toute chose = par ailleurs. La différence de probabilité de satisfaction due au fait de bénéficier d'un programme de fidélité
+new1<-data.frame(
+  "Genre"= mean(al$Genre),
+  "TypeClient"=c(0,1),
+  "Age"=mean(al$Age),
+  "TypeVoyage"=mean(al$TypeVoyage),
+  "Classe"=c(0,0),
+  "DistanceVol"=mean(al$DistanceVol),
+  "ConfortSiege"=mean(al$ConfortSiege),
+  "PraticiteHoraires"=mean(al$PraticiteHoraires),
+  "Nourriture"=mean(al$Nourriture),
+  "LocalisationPorte"=mean(al$LocalisationPorte),
+  "WifiVol"=mean(al$WifiVol),
+  "DivertissementVol"=mean(al$DivertissementVol),
+  "AideEnLigne"=mean(al$AideEnLigne),
+  "ReservationInternet"=mean(al$ReservationInternet),
+  "ServiceVol"=mean(al$ServiceVol),
+  "EspaceJambes"=mean(al$EspaceJambes),
+  "GestionBagages"=mean(al$GestionBagages),
+  "Enregistrement"=mean(al$Enregistrement),
+  "Proprete"=mean(al$Proprete),
+  "EmbarquementEnLigne"=mean(al$EmbarquementEnLigne),
+  "RetardDepartMn"=mean(al$RetardDepartMn)
+)
+#La différence de probabilité de satisfaction due au fait de voyager en business class
+new2<-data.frame(
+  "Genre"= mean(al$Genre),
+  "TypeClient"=c(0,0),
+  "Age"=mean(al$Age),
+  "TypeVoyage"=mean(al$TypeVoyage),
+  "Classe"=c(0,1),
+  "DistanceVol"=mean(al$DistanceVol),
+  "ConfortSiege"=mean(al$ConfortSiege),
+  "PraticiteHoraires"=mean(al$PraticiteHoraires),
+  "Nourriture"=mean(al$Nourriture),
+  "LocalisationPorte"=mean(al$LocalisationPorte),
+  "WifiVol"=mean(al$WifiVol),
+  "DivertissementVol"=mean(al$DivertissementVol),
+  "AideEnLigne"=mean(al$AideEnLigne),
+  "ReservationInternet"=mean(al$ReservationInternet),
+  "ServiceVol"=mean(al$ServiceVol),
+  "EspaceJambes"=mean(al$EspaceJambes),
+  "GestionBagages"=mean(al$GestionBagages),
+  "Enregistrement"=mean(al$Enregistrement),
+  "Proprete"=mean(al$Proprete),
+  "EmbarquementEnLigne"=mean(al$EmbarquementEnLigne),
+  "RetardDepartMn"=mean(al$RetardDepartMn)
+)
+
+new3<-data.frame(
+  "Genre"= mean(al$Genre),
+  "TypeClient"=c(0,1),
+  "Age"=mean(al$Age),
+  "TypeVoyage"=mean(al$TypeVoyage),
+  "Classe"=c(0,1),
+  "DistanceVol"=mean(al$DistanceVol),
+  "ConfortSiege"=mean(al$ConfortSiege),
+  "PraticiteHoraires"=mean(al$PraticiteHoraires),
+  "Nourriture"=mean(al$Nourriture),
+  "LocalisationPorte"=mean(al$LocalisationPorte),
+  "WifiVol"=mean(al$WifiVol),
+  "DivertissementVol"=mean(al$DivertissementVol),
+  "AideEnLigne"=mean(al$AideEnLigne),
+  "ReservationInternet"=mean(al$ReservationInternet),
+  "ServiceVol"=mean(al$ServiceVol),
+  "EspaceJambes"=mean(al$EspaceJambes),
+  "GestionBagages"=mean(al$GestionBagages),
+  "Enregistrement"=mean(al$Enregistrement),
+  "Proprete"=mean(al$Proprete),
+  "EmbarquementEnLigne"=mean(al$EmbarquementEnLigne),
+  "RetardDepartMn"=mean(al$RetardDepartMn)
+)
+
+#MLG8
+predictions <- predict(MLG8, newdata = new1)
+diff(predictions)
+#MLG8
+predictions <- predict(MLG8, newdata = new2)
+diff(predictions)
+#MLG8
+predictions <- predict(MLG8, newdata = new3)
+diff(predictions)
+
+#LGVA1 : 8 + variables client
+predictions <- predict(LGVA1, newdata = new1)
+diff(predictions)
+#LGVA1 : 8 + variables client
+predictions <- predict(LGVA1, newdata = new2)
+diff(predictions)
+#LGVA1 : 8 + variables client
+predictions <- predict(LGVA1, newdata = new3)
+diff(predictions)
+
+#LGVA2 : 8 + variables vol
+predictions <- predict(LGVA2, newdata = new1)
+diff(predictions)
+#LGVA2 : 8 + variables vol
+predictions <- predict(LGVA2, newdata = new2)
+diff(predictions)
+#LGVA2 : 8 + variables vol
+predictions <- predict(LGVA2, newdata = new3)
+diff(predictions)
+
+#LGVA3 : 8+ variables aspects techniques et organisationnels
+predictions <- predict(LGVA3, newdata = new1)
+diff(predictions)
+#LGVA3 : 8+ variables aspects techniques et organisationnels
+predictions <- predict(LGVA3, newdata = new2)
+diff(predictions)
+#LGVA3 : 8+ variables aspects techniques et organisationnels
+predictions <- predict(LGVA3, newdata = new3)
+diff(predictions)
+
+#LGVA4 : 8+ variables qualité service et relationnel
+predictions <- predict(LGVA4, newdata = new1)
+diff(predictions)
+#LGVA4 : 8+ variables qualité service et relationnel
+predictions <- predict(LGVA4, newdata = new2)
+diff(predictions)
+#LGVA4 : 8+ variables qualité service et relationnel
+predictions <- predict(LGVA4, newdata = new3)
+diff(predictions)
+
+#LGVA5 : 8+ variables confort vol
+predictions <- predict(LGVA5, newdata = new1)
+diff(predictions)
+#LGVA5 : 8+ variables confort vol
+predictions <- predict(LGVA5, newdata = new2)
+diff(predictions)
+#LGVA5 : 8+ variables confort vol
+predictions <- predict(LGVA5, newdata = new3)
+diff(predictions)
+
+#LGVA6 : 8+ tout sauf confort vol
+predictions <- predict(LGVA6, newdata = new1)
+diff(predictions)
+#LGVA6 : 8+ tout sauf confort vol
+predictions <- predict(LGVA6, newdata = new2)
+diff(predictions)
+#LGVA6 : 8+ tout sauf confort vol
+predictions <- predict(LGVA6, newdata = new3)
+diff(predictions)
+#LGVA7 : 8 + tout y compris confort vol
+predictions <- predict(LGVA7, newdata = new1)
+diff(predictions)
+#LGVA7 : 8 + tout y compris confort vol
+predictions <- predict(LGVA7, newdata = new2)
+diff(predictions)
+#LGVA7 : 8 + tout y compris confort vol
+predictions <- predict(LGVA7, newdata = new3)
+diff(predictions)
+```
+
+
+
+
+
